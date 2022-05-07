@@ -1,0 +1,22 @@
+###
+PUT http://localhost:8080/v1/exchange
+
+<> 2022-05-07T231820.201.json
+
+###
+GET http://localhost:8080/v1/exchange?from=EUR&to=PLN&date=2020-12-05
+
+<> 2022-05-07T231841.404.json
+
+###
+GET http://localhost:8080/v1/exchange?from=EUR&to=MKD
+
+<> 2022-05-07T231901.200.json
+<> 2022-05-07T231841.404.json
+
+###
+GET http://localhost:8080/v1/exchange?from=EUR&to=MKD&date=2022-05-07
+
+<> 2022-05-07T231928.200.json
+<> 2022-05-07T231901.200.json
+<> 2022-05-07T231841.404.json
