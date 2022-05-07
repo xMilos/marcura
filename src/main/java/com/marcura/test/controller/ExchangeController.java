@@ -1,7 +1,9 @@
 package com.marcura.test.controller;
 
+import com.marcura.test.exception.BadCurrencyException;
 import com.marcura.test.model.response.CurrencyExchangeResponse;
 import com.marcura.test.service.ExchangeService;
+import com.marcura.test.util.CurrencyValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -17,8 +19,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("v1")
@@ -57,9 +61,14 @@ public class ExchangeController {
     @Parameter(name = "from", example = "EUR", description = "Set from currency")
     @RequestParam String from,
     @Parameter(name = "to", example = "PLN", description = "Set currency to exchange to")
-    @RequestParam String to,
-    @Parameter(name = "date", example = "2022-04-05", description = "Set date or leave empty for latest date")
-    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+    @RequestParam  String to,
+    @Parameter(name = "date", example = "2022-04-05", description = "Set date in format yyyy-MM-dd or leave empty for latest date")
+    @RequestParam(required = false)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+    from = from.toUpperCase(Locale.ROOT);
+    to = to.toUpperCase(Locale.ROOT);
+    validateCurrency(from);
+    validateCurrency(to);
     log.info("getting exchange from:" + from + " to " + to + " for date " + date);
     CurrencyExchangeResponse crr = exchangeService.getExchangeRates(from, to, date);
     return ResponseEntity.ok(crr);
@@ -82,5 +91,11 @@ public class ExchangeController {
   public ResponseEntity<List<Long>> updateExchange() {
     log.info("update exchange");
     return ResponseEntity.status(201).body(exchangeService.saveOrUpdateExchange());
+  }
+
+  private void validateCurrency(String currency) {
+    if(!CurrencyValidator.validCurrencies.contains(currency)){
+      throw new BadCurrencyException();
+    }
   }
 }
